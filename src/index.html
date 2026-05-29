@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <base href="/run/couples-bucket-list/" />
+  <title>Couple's Bucket List</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--hub-font, system-ui, sans-serif);
+      font-size: var(--hub-font-size, 15px);
+      background: var(--hub-bg, #f9fafb);
+      color: var(--hub-text, #111827);
+      min-height: 100vh;
+    }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* ── App header ── */
+    .app-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px 0;
+    }
+    .app-header-left { display: flex; align-items: center; gap: 8px; }
+    .app-header .icon { font-size: 1.3rem; }
+    .app-header h1 { font-size: 1.25rem; font-weight: 700; }
+
+    /* ── Setup view ── */
+    .setup-wrap {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 48px 20px; min-height: 80vh; justify-content: center;
+    }
+    .setup-card {
+      background: var(--hub-surface, #fff);
+      border: 1px solid var(--hub-border, #e5e7eb);
+      border-radius: var(--hub-radius, 8px);
+      padding: 32px; max-width: 420px; width: 100%; text-align: center;
+    }
+    .setup-icon { font-size: 2.5rem; margin-bottom: 16px; }
+    .setup-card h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 6px; }
+    .setup-card .setup-desc { color: var(--hub-text-muted, #6b7280); font-size: 0.9rem; margin-bottom: 24px; }
+    .setup-card .pick-label { font-weight: 600; margin-bottom: 12px; text-align: left; display: block; }
+    .member-list { margin-bottom: 20px; }
+    .member-option {
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+      border: 1px solid var(--hub-border, #e5e7eb); border-radius: var(--hub-radius, 6px);
+      cursor: pointer; margin-bottom: 6px; transition: border-color .15s, background .15s; text-align: left;
+    }
+    .member-option input[type="radio"] { accent-color: var(--hub-primary, #6366f1); }
+    .member-option:has(input:checked) {
+      border-color: var(--hub-primary, #6366f1);
+      background: color-mix(in srgb, var(--hub-primary, #6366f1) 6%, transparent);
+    }
+    .member-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .member-name { font-weight: 500; font-size: 0.95rem; }
+
+    /* ── Progress bar ── */
+    .progress-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 20px 0;
+    }
+    .progress-bar-wrap { flex: 1; height: 6px; background: var(--hub-border, #e5e7eb); border-radius: 999px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: var(--hub-primary, #6366f1); border-radius: 999px; transition: width .4s; }
+    .progress-label { font-size: 0.82rem; color: var(--hub-text-muted, #6b7280); white-space: nowrap; }
+
+    /* ── Content ── */
+    .content { padding: 14px 20px 20px; }
+
+    /* ── Category sections ── */
+    .category-section { margin-bottom: 20px; }
+    .category-heading {
+      font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em;
+      color: var(--hub-text-muted, #6b7280); margin-bottom: 8px;
+    }
+    .items-list { display: flex; flex-direction: column; gap: 8px; }
+
+    /* ── Item cards ── */
+    .item-card {
+      background: var(--hub-surface, #fff);
+      border: 1px solid var(--hub-border, #e5e7eb);
+      border-radius: var(--hub-radius, 8px);
+      padding: 12px 14px;
+    }
+    .item-header { display: flex; align-items: flex-start; gap: 8px; }
+    .item-check {
+      width: 18px; height: 18px; border: 2px solid var(--hub-border, #e5e7eb);
+      border-radius: 4px; flex-shrink: 0; cursor: pointer; margin-top: 2px;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s, border-color .15s;
+    }
+    .item-check.done { background: var(--hub-primary, #6366f1); border-color: var(--hub-primary, #6366f1); color: #fff; font-size: 0.7rem; }
+    .item-title { font-weight: 500; font-size: 0.95rem; flex: 1; line-height: 1.4; }
+    .item-title.done { text-decoration: line-through; opacity: .6; }
+    .item-notes { font-size: 0.85rem; color: var(--hub-text-muted, #6b7280); margin-top: 5px; white-space: pre-wrap; word-break: break-word; }
+    .item-done-note { font-size: 0.85rem; color: var(--hub-text-muted, #6b7280); margin-top: 5px; font-style: italic; }
+    .item-photo { margin-top: 8px; max-width: 100%; border-radius: var(--hub-radius, 6px); max-height: 200px; object-fit: cover; }
+    .item-meta { margin-top: 6px; font-size: 0.78rem; color: var(--hub-text-muted, #6b7280); }
+
+    /* ── Completed section toggle ── */
+    .completed-toggle {
+      background: transparent; border: none; cursor: pointer;
+      color: var(--hub-text-muted, #6b7280); font-size: 0.9rem; font-weight: 500;
+      display: flex; align-items: center; gap: 6px; padding: 8px 0; margin-bottom: 8px;
+    }
+    .completed-toggle:hover { color: var(--hub-text, #111827); }
+
+    /* ── Empty state ── */
+    .empty-state { text-align: center; padding: 40px 20px; color: var(--hub-text-muted, #6b7280); }
+    .empty-state .empty-icon { font-size: 2rem; margin-bottom: 12px; }
+    .empty-state p { font-size: 0.95rem; }
+
+    /* ── Buttons ── */
+    .btn-primary {
+      background: var(--hub-primary, #6366f1); color: var(--hub-primary-fg, #fff);
+      border: none; border-radius: var(--hub-radius, 6px);
+      padding: 10px 20px; font-size: 0.95rem; font-weight: 600; cursor: pointer;
+      transition: opacity .15s; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-primary:hover:not(:disabled) { opacity: .85; }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-secondary {
+      background: transparent; color: var(--hub-text, #111827);
+      border: 1px solid var(--hub-border, #e5e7eb);
+      border-radius: var(--hub-radius, 6px);
+      padding: 10px 20px; font-size: 0.95rem; font-weight: 500; cursor: pointer;
+    }
+    .btn-secondary:hover { background: var(--hub-bg, #f9fafb); }
+    .btn-icon {
+      background: transparent; border: none; cursor: pointer;
+      color: var(--hub-text-muted, #6b7280); padding: 6px;
+      border-radius: var(--hub-radius, 4px); font-size: 1rem; line-height: 1;
+    }
+    .btn-icon:hover { color: var(--hub-text, #111827); background: var(--hub-bg, #f9fafb); }
+
+    /* ── Modal ── */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,.45);
+      display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px;
+    }
+    .modal {
+      background: var(--hub-surface, #fff); border-radius: var(--hub-radius, 8px);
+      padding: 24px; width: 100%; max-width: 460px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.18); max-height: 90vh; overflow-y: auto;
+    }
+    .modal h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 16px; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-weight: 500; margin-bottom: 5px; font-size: 0.9rem; }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%; padding: 9px 12px;
+      border: 1px solid var(--hub-border, #e5e7eb);
+      border-radius: var(--hub-radius, 6px);
+      background: var(--hub-bg, #f9fafb);
+      color: var(--hub-text, #111827);
+      font-family: inherit; font-size: inherit;
+    }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: 2px solid var(--hub-primary, #6366f1); outline-offset: 1px; }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .upload-area {
+      border: 2px dashed var(--hub-border, #e5e7eb); border-radius: var(--hub-radius, 6px);
+      padding: 16px; text-align: center; cursor: pointer; font-size: 0.85rem; color: var(--hub-text-muted, #6b7280);
+    }
+    .upload-area:hover { border-color: var(--hub-primary, #6366f1); }
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+  </style>
+</head>
+<body>
+
+  <!-- ── Setup view ── -->
+  <div id="view-setup" class="view">
+    <div class="setup-wrap">
+      <div class="setup-card">
+        <div class="setup-icon">🪣</div>
+        <h2>Couple's Bucket List</h2>
+        <p class="setup-desc">A shared wishlist of experiences — travel, food, skills, and milestones — for just the two of you.</p>
+        <span class="pick-label">Who is your partner?</span>
+        <div id="setup-members" class="member-list"></div>
+        <button class="btn-primary" style="width:100%;justify-content:center" onclick="savePartner()">Get Started</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Main view ── -->
+  <div id="view-main" class="view">
+    <div class="app-header">
+      <div class="app-header-left">
+        <span class="icon">🪣</span>
+        <h1>Bucket List</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="btn-icon" title="Change partner" onclick="showSetup()">⚙️</button>
+        <button class="btn-primary" onclick="openAddItem()">+ Add</button>
+      </div>
+    </div>
+    <div id="progress-row" class="progress-row"></div>
+    <div class="content">
+      <div id="active-list"></div>
+      <div id="completed-section"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { esc, initial, memberColor, formatRelativeDate, createFilesHelper } from "/hub-sdk.js";
+    import { CATEGORIES, validateItem, categoryLabel, groupByCategory } from "./logic.js";
+
+    const CONTEXT = window.__CONTEXT_URL ?? "";
+    const DB      = window.__DB_URL      ?? "";
+    const ME      = window.__CURRENT_MEMBER ?? null;
+    const APP_ID  = window.__APP_ID ?? "couples-bucket-list";
+
+    const files = createFilesHelper(window.__FILES_URL ?? "");
+
+    let members  = [];
+    let partner  = null;
+    let items    = [];
+    let modalEl  = null;
+    let completedVisible = false;
+
+    async function db(sql, params = []) {
+      if (!DB) return { rows: [] };
+      const res = await fetch(DB, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sql, params }),
+      });
+      return res.json();
+    }
+
+    async function loadMembers() {
+      if (!CONTEXT) {
+        members = [
+          { id: "demo-1", name: "Alex",   role: "adult" },
+          { id: "demo-2", name: "Jordan", role: "adult" },
+          { id: "demo-3", name: "Sam",    role: "adult" },
+        ];
+        return;
+      }
+      try {
+        const res = await fetch(`${CONTEXT}?keys=family.members`);
+        members = ((await res.json())["family.members"]) ?? [];
+      } catch { members = []; }
+    }
+
+    async function loadPartner() {
+      if (!ME) return null;
+      const { rows } = await db(
+        "SELECT partner_id FROM partner_config WHERE member_id = ?",
+        [ME.id]
+      );
+      return rows.length ? (members.find(m => m.id === rows[0].partner_id) ?? null) : null;
+    }
+
+    async function loadItems() {
+      if (!ME || !partner) {
+        items = [
+          { id: "d1", created_by: "demo-1", title: "See the Northern Lights", notes: "Iceland or Norway", category: "travel", done_at: null, done_note: null, photo_id: null, created_at: new Date(Date.now() - 86400000).toISOString() },
+          { id: "d2", created_by: "demo-2", title: "Take a cooking class together", notes: "Italian or Thai", category: "skill", done_at: null, done_note: null, photo_id: null, created_at: new Date(Date.now() - 172800000).toISOString() },
+          { id: "d3", created_by: "demo-1", title: "Try omakase sushi", notes: "", category: "food", done_at: new Date(Date.now() - 604800000).toISOString(), done_note: "Amazing experience! 10/10", photo_id: null, created_at: new Date(Date.now() - 700000000).toISOString() },
+        ];
+        return;
+      }
+      const { rows } = await db(
+        "SELECT * FROM bucket_items WHERE created_by IN (?, ?) ORDER BY created_at DESC",
+        [ME.id, partner.id]
+      );
+      items = rows;
+    }
+
+    window.savePartner = async function() {
+      const sel = document.querySelector('#setup-members input[type="radio"]:checked');
+      if (!sel) return;
+      const partnerId = sel.value;
+      const btn = document.querySelector('#view-setup .btn-primary');
+      if (btn) { btn.disabled = true; btn.textContent = "Saving…"; }
+      try {
+        if (ME) {
+          await db(
+            `INSERT INTO partner_config (member_id, partner_id) VALUES (?, ?)
+             ON CONFLICT (member_id, household_id) DO UPDATE SET partner_id = EXCLUDED.partner_id`,
+            [ME.id, partnerId]
+          );
+        }
+        partner = members.find(m => m.id === partnerId) ?? null;
+        await loadItems();
+        showMain();
+      } catch(e) {
+        if (btn) { btn.disabled = false; btn.textContent = "Get Started"; }
+        throw e;
+      }
+    };
+
+    // ── Modal helpers ─────────────────────────────────────────────────────────
+    function openModal(html) {
+      closeModal();
+      modalEl = document.createElement("div");
+      modalEl.className = "modal-backdrop";
+      modalEl.innerHTML = `<div class="modal">${html}</div>`;
+      modalEl.addEventListener("click", e => { if (e.target === modalEl) closeModal(); });
+      document.body.appendChild(modalEl);
+    }
+    window.closeModal = function() { modalEl?.remove(); modalEl = null; };
+
+    // ── Add item ──────────────────────────────────────────────────────────────
+    window.openAddItem = function() {
+      const catOptions = CATEGORIES.map(c =>
+        `<option value="${esc(c.value)}">${esc(c.label)}</option>`
+      ).join("");
+      openModal(`
+        <h3>Add to Bucket List</h3>
+        <div class="form-group">
+          <label>What do you want to do?</label>
+          <input id="f-title" type="text" placeholder="e.g. See the Northern Lights" />
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="f-category">${catOptions}</select>
+        </div>
+        <div class="form-group">
+          <label>Notes <span style="color:var(--hub-text-muted,#6b7280);font-weight:400">(optional)</span></label>
+          <textarea id="f-notes" placeholder="Details, ideas, where to go…"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+          <button class="btn-primary" onclick="submitItem()">Add</button>
+        </div>
+      `);
+      document.getElementById("f-title").focus();
+    };
+
+    window.submitItem = async function() {
+      const titleInput = document.getElementById("f-title");
+      const result = validateItem(titleInput?.value);
+      if (!result.valid) { titleInput?.focus(); return; }
+
+      const btn = modalEl?.querySelector(".modal-actions .btn-primary");
+      if (btn) { btn.disabled = true; btn.textContent = "Adding…"; }
+      try {
+        if (ME) {
+          await db(
+            "INSERT INTO bucket_items (id, created_by, title, notes, category, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+            [crypto.randomUUID(), ME.id, result.trimmed,
+             document.getElementById("f-notes")?.value.trim() ?? "",
+             document.getElementById("f-category")?.value ?? "other",
+             new Date().toISOString()]
+          );
+          await loadItems();
+        }
+        closeModal();
+        renderItems();
+      } catch(e) {
+        if (btn) { btn.disabled = false; btn.textContent = "Add"; }
+        throw e;
+      }
+    };
+
+    // ── Mark done ─────────────────────────────────────────────────────────────
+    window.openMarkDone = function(id) {
+      const item = items.find(i => i.id === id);
+      if (!item) return;
+      const uploadHtml = window.__FILES_URL
+        ? `<div class="form-group">
+             <label>Photo <span style="color:var(--hub-text-muted,#6b7280);font-weight:400">(optional)</span></label>
+             <label class="upload-area" for="f-photo">📷 Tap to attach a photo</label>
+             <input id="f-photo" type="file" accept="image/*" style="display:none" onchange="previewPhoto(this)" />
+             <img id="photo-preview" style="display:none;margin-top:8px;max-width:100%;border-radius:var(--hub-radius,6px)" />
+           </div>`
+        : "";
+      openModal(`
+        <h3>Mark as Done 🎉</h3>
+        <p style="color:var(--hub-text-muted,#6b7280);margin-bottom:16px;font-size:.9rem">${esc(item.title)}</p>
+        <div class="form-group">
+          <label>How did it go? <span style="color:var(--hub-text-muted,#6b7280);font-weight:400">(optional)</span></label>
+          <textarea id="f-done-note" placeholder="A moment to remember…"></textarea>
+        </div>
+        ${uploadHtml}
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+          <button class="btn-primary" onclick="confirmDone('${esc(id)}')">Done! ✓</button>
+        </div>
+      `);
+    };
+
+    window.previewPhoto = function(input) {
+      const file = input.files?.[0];
+      if (!file) return;
+      const preview = document.getElementById("photo-preview");
+      if (!preview) return;
+      preview.src = URL.createObjectURL(file);
+      preview.style.display = "block";
+    };
+
+    window.confirmDone = async function(id) {
+      const btn = modalEl?.querySelector(".modal-actions .btn-primary");
+      if (btn) { btn.disabled = true; btn.textContent = "Saving…"; }
+      try {
+        const doneNote = document.getElementById("f-done-note")?.value.trim() ?? "";
+        const photoFile = document.getElementById("f-photo")?.files?.[0];
+        let photoId = null;
+        if (photoFile) {
+          const { id: fid } = await files.upload(photoFile);
+          photoId = fid;
+        }
+        if (ME) {
+          await db(
+            "UPDATE bucket_items SET done_at = ?, done_note = ?, photo_id = ? WHERE id = ?",
+            [new Date().toISOString(), doneNote || null, photoId, id]
+          );
+          await loadItems();
+        }
+        closeModal();
+        renderItems();
+      } catch(e) {
+        if (btn) { btn.disabled = false; btn.textContent = "Done! ✓"; }
+        throw e;
+      }
+    };
+
+    // ── Toggle completed ──────────────────────────────────────────────────────
+    window.toggleCompleted = function() {
+      completedVisible = !completedVisible;
+      renderItems();
+    };
+
+    // ── Views ─────────────────────────────────────────────────────────────────
+    window.showSetup = function() {
+      const otherAdults = members.filter(m => m.role === "adult" && m.id !== (ME?.id ?? "demo-1"));
+      const listEl = document.getElementById("setup-members");
+      listEl.innerHTML = otherAdults.map(m => {
+        const color = memberColor(m.id, members);
+        return `<label class="member-option">
+          <input type="radio" name="partner" value="${esc(m.id)}" />
+          <span class="member-avatar" style="background:${color}">${esc(initial(m.name))}</span>
+          <span class="member-name">${esc(m.name)}</span>
+        </label>`;
+      }).join("");
+      if (partner) {
+        const radio = listEl.querySelector(`input[value="${CSS.escape(partner.id)}"]`);
+        if (radio) radio.checked = true;
+      }
+      document.getElementById("view-setup").classList.add("active");
+      document.getElementById("view-main").classList.remove("active");
+    };
+
+    function showMain() {
+      document.getElementById("view-setup").classList.remove("active");
+      document.getElementById("view-main").classList.add("active");
+      renderItems();
+    }
+
+    function renderItems() {
+      const active    = items.filter(i => !i.done_at);
+      const completed = items.filter(i => i.done_at).sort((a,b) => b.done_at.localeCompare(a.done_at));
+      const total     = items.length;
+      const doneCount = completed.length;
+
+      // Progress bar
+      const progressEl = document.getElementById("progress-row");
+      if (total > 0) {
+        const pct = Math.round((doneCount / total) * 100);
+        progressEl.innerHTML = `
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+          <span class="progress-label">${doneCount} / ${total} done</span>`;
+      } else {
+        progressEl.innerHTML = "";
+      }
+
+      // Active items grouped by category
+      const activeEl = document.getElementById("active-list");
+      if (!active.length) {
+        activeEl.innerHTML = `<div class="empty-state"><div class="empty-icon">🪣</div><p>No items yet — add your first dream!</p></div>`;
+      } else {
+        const groups = groupByCategory(active);
+        activeEl.innerHTML = groups.map(g => `
+          <div class="category-section">
+            <div class="category-heading">${esc(categoryLabel(g.category))}</div>
+            <div class="items-list">${g.items.map(item => renderItemCard(item, false)).join("")}</div>
+          </div>`).join("");
+      }
+
+      // Completed section
+      const compEl = document.getElementById("completed-section");
+      if (!completed.length) { compEl.innerHTML = ""; return; }
+      const listHtml = completedVisible
+        ? `<div class="items-list">${completed.map(item => renderItemCard(item, true)).join("")}</div>`
+        : "";
+      compEl.innerHTML = `
+        <button class="completed-toggle" onclick="toggleCompleted()">
+          ${completedVisible ? "▾" : "▸"} Completed (${doneCount})
+        </button>
+        ${listHtml}`;
+    }
+
+    function renderItemCard(item, isDone) {
+      const checkHtml = `<span class="item-check${isDone ? " done" : ""}" onclick="${isDone ? "" : `openMarkDone('${esc(item.id)}')`}" style="cursor:${isDone ? "default" : "pointer"}">${isDone ? "✓" : ""}</span>`;
+      const notesHtml  = item.notes ? `<div class="item-notes">${esc(item.notes)}</div>` : "";
+      const doneNoteHtml = item.done_note ? `<div class="item-done-note">"${esc(item.done_note)}"</div>` : "";
+      const photoHtml  = item.photo_id
+        ? `<img class="item-photo" src="${esc(files.url(item.photo_id))}" alt="" loading="lazy" />`
+        : "";
+      const metaHtml   = isDone
+        ? `<div class="item-meta">Completed ${formatRelativeDate(item.done_at)}</div>`
+        : `<div class="item-meta">Added ${formatRelativeDate(item.created_at)}</div>`;
+      return `
+        <div class="item-card">
+          <div class="item-header">
+            ${checkHtml}
+            <span class="item-title${isDone ? " done" : ""}">${esc(item.title)}</span>
+          </div>
+          ${notesHtml}${doneNoteHtml}${photoHtml}${metaHtml}
+        </div>`;
+    }
+
+    // ── Init ──────────────────────────────────────────────────────────────────
+    (async () => {
+      await loadMembers();
+      partner = await loadPartner();
+      if (!partner) {
+        window.showSetup();
+      } else {
+        await loadItems();
+        showMain();
+      }
+    })();
+  </script>
+</body>
+</html>

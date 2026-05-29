@@ -1,0 +1,21 @@
+{
+  "id": "couples-bucket-list",
+  "name": "Couple's Bucket List",
+  "version": "1.0.0",
+  "description": "A shared wishlist of experiences — travel, food, skills, milestones — that you want to do together.",
+  "entrypoint": "index.html",
+  "runtime": "static",
+  "category": "couple",
+  "tags": ["couples"],
+  "data_access": {
+    "reads": ["family.members"],
+    "writes": []
+  },
+  "permissions": {
+    "default_audience": "adults",
+    "requires_approval": false
+  },
+  "storage": "db",
+  "icon": "🪣",
+  "nav": { "label": "Bucket List" }
+}
