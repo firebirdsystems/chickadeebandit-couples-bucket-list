@@ -334,24 +334,27 @@
       const result = validateItem(titleInput?.value);
       if (!result.valid) { titleInput?.focus(); return; }
 
-      const btn = modalEl?.querySelector(".modal-actions .btn-primary");
-      if (btn) { btn.disabled = true; btn.textContent = "Adding…"; }
+      const id       = crypto.randomUUID();
+      const now      = new Date().toISOString();
+      const title    = result.trimmed;
+      const notes    = document.getElementById("f-notes")?.value.trim() ?? "";
+      const category = document.getElementById("f-category")?.value ?? "other";
+
+      // Optimistic: add to list, close modal, render immediately
+      const optimisticItem = { id, created_by: ME?.id ?? "demo", title, notes, category, done_at: null, done_note: null, photo_id: null, created_at: now };
+      items = [optimisticItem, ...items];
+      closeModal();
+      renderItems();
+
+      if (!ME) return;
       try {
-        if (ME) {
-          await db(
-            "INSERT INTO bucket_items (id, created_by, title, notes, category, created_at) VALUES (?, ?, ?, ?, ?, ?)",
-            [crypto.randomUUID(), ME.id, result.trimmed,
-             document.getElementById("f-notes")?.value.trim() ?? "",
-             document.getElementById("f-category")?.value ?? "other",
-             new Date().toISOString()]
-          );
-          await loadItems();
-        }
-        closeModal();
+        await db(
+          "INSERT INTO bucket_items (id, created_by, title, notes, category, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+          [id, ME.id, title, notes, category, now]
+        );
+      } catch {
+        items = items.filter(i => i !== optimisticItem);
         renderItems();
-      } catch(e) {
-        if (btn) { btn.disabled = false; btn.textContent = "Add"; }
-        throw e;
       }
     };
 
@@ -395,22 +398,41 @@
       const btn = modalEl?.querySelector(".modal-actions .btn-primary");
       if (btn) { btn.disabled = true; btn.textContent = "Saving…"; }
       try {
-        const doneNote = document.getElementById("f-done-note")?.value.trim() ?? "";
+        const doneNote  = document.getElementById("f-done-note")?.value.trim() ?? "";
         const photoFile = document.getElementById("f-photo")?.files?.[0];
+        const item      = items.find(i => i.id === id);
+        const origItem  = item ? { done_at: item.done_at, done_note: item.done_note, photo_id: item.photo_id } : null;
+
         let photoId = null;
         if (photoFile) {
           const { id: fid } = await files.upload(photoFile);
           photoId = fid;
         }
-        if (ME) {
-          await db(
-            "UPDATE bucket_items SET done_at = ?, done_note = ?, photo_id = ? WHERE id = ?",
-            [new Date().toISOString(), doneNote || null, photoId, id]
-          );
-          await loadItems();
+
+        const now = new Date().toISOString();
+
+        if (!photoFile && item) {
+          // Optimistic: update in memory, close modal, render immediately
+          item.done_at = now; item.done_note = doneNote || null; item.photo_id = null;
+          closeModal(); renderItems();
+          if (ME) {
+            try {
+              await db("UPDATE bucket_items SET done_at = ?, done_note = ?, photo_id = ? WHERE id = ?",
+                [now, doneNote || null, null, id]);
+            } catch {
+              if (origItem) Object.assign(item, origItem);
+              renderItems();
+            }
+          }
+        } else {
+          // Photo case: wait for upload + DB write, then update in memory
+          if (ME) {
+            await db("UPDATE bucket_items SET done_at = ?, done_note = ?, photo_id = ? WHERE id = ?",
+              [now, doneNote || null, photoId, id]);
+            if (item) { item.done_at = now; item.done_note = doneNote || null; item.photo_id = photoId; }
+          }
+          closeModal(); renderItems();
         }
-        closeModal();
-        renderItems();
       } catch(e) {
         if (btn) { btn.disabled = false; btn.textContent = "Done! ✓"; }
         throw e;
