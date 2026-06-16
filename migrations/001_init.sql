@@ -1,13 +1,11 @@
-CREATE TABLE IF NOT EXISTS partner_config (
+CREATE TABLE IF NOT EXISTS app_couples_bucket_list__partner_config (
   member_id TEXT NOT NULL,
-  household_id UUID NOT NULL DEFAULT current_setting('app.household_id', true)::uuid,
   partner_id TEXT NOT NULL,
-  PRIMARY KEY (member_id, household_id)
+  PRIMARY KEY (member_id)
 );
 
-CREATE TABLE IF NOT EXISTS bucket_items (
+CREATE TABLE IF NOT EXISTS app_couples_bucket_list__bucket_items (
   id TEXT PRIMARY KEY,
-  household_id UUID NOT NULL DEFAULT current_setting('app.household_id', true)::uuid,
   created_by TEXT NOT NULL,
   title TEXT NOT NULL,
   notes TEXT,

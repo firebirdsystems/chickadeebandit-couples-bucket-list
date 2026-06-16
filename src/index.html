@@ -246,7 +246,7 @@
     async function loadPartner() {
       if (!ME) return null;
       const { rows } = await db(
-        "SELECT partner_id FROM partner_config WHERE member_id = ?",
+        "SELECT partner_id FROM app_couples_bucket_list__partner_config WHERE member_id = ?",
         [ME.id]
       );
       return rows.length ? (members.find(m => m.id === rows[0].partner_id) ?? null) : null;
@@ -262,7 +262,7 @@
         return;
       }
       const { rows } = await db(
-        "SELECT * FROM bucket_items WHERE created_by IN (?, ?) ORDER BY created_at DESC",
+        "SELECT * FROM app_couples_bucket_list__bucket_items WHERE created_by IN (?, ?) ORDER BY created_at DESC",
         [ME.id, partner.id]
       );
       items = rows;
@@ -277,8 +277,8 @@
       try {
         if (ME) {
           await db(
-            `INSERT INTO partner_config (member_id, partner_id) VALUES (?, ?)
-             ON CONFLICT (member_id, household_id) DO UPDATE SET partner_id = EXCLUDED.partner_id`,
+            `INSERT INTO app_couples_bucket_list__partner_config (member_id, partner_id) VALUES (?, ?)
+             ON CONFLICT (member_id) DO UPDATE SET partner_id = EXCLUDED.partner_id`,
             [ME.id, partnerId]
           );
         }
@@ -349,7 +349,7 @@
       if (!ME) return;
       try {
         await db(
-          "INSERT INTO bucket_items (id, created_by, title, notes, category, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+          "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at) VALUES (?, ?, ?, ?, ?, ?)",
           [id, ME.id, title, notes, category, now]
         );
       } catch {
@@ -417,7 +417,7 @@
           closeModal(); renderItems();
           if (ME) {
             try {
-              await db("UPDATE bucket_items SET done_at = ?, done_note = ?, photo_id = ? WHERE id = ?",
+              await db("UPDATE app_couples_bucket_list__bucket_items SET done_at = ?, done_note = ?, photo_id = ? WHERE id = ?",
                 [now, doneNote || null, null, id]);
             } catch {
               if (origItem) Object.assign(item, origItem);
@@ -427,7 +427,7 @@
         } else {
           // Photo case: wait for upload + DB write, then update in memory
           if (ME) {
-            await db("UPDATE bucket_items SET done_at = ?, done_note = ?, photo_id = ? WHERE id = ?",
+            await db("UPDATE app_couples_bucket_list__bucket_items SET done_at = ?, done_note = ?, photo_id = ? WHERE id = ?",
               [now, doneNote || null, photoId, id]);
             if (item) { item.done_at = now; item.done_note = doneNote || null; item.photo_id = photoId; }
           }

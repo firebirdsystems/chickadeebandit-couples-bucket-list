@@ -16,6 +16,21 @@
     "requires_approval": false
   },
   "storage": "db",
+  "row_policies": {
+    "partner_config": {
+      "kind": "owner_only",
+      "member_column": "member_id",
+      "adults_bypass": false
+    },
+    "bucket_items": {
+      "kind": "couple_scoped",
+      "self_column": "created_by",
+      "participant_columns": ["created_by"],
+      "partner_table": "partner_config",
+      "partner_member_column": "member_id",
+      "partner_id_column": "partner_id"
+    }
+  },
   "icon": "🪣",
   "nav": { "label": "Bucket List" }
 }
