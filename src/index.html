@@ -214,6 +214,7 @@
 
     let members  = [];
     let partner  = null;
+    let partnerReciprocal = false;
     let items    = [];
     let modalEl  = null;
     let completedVisible = false;
@@ -245,11 +246,10 @@
 
     async function loadPartner() {
       if (!ME) return null;
-      const { rows } = await db(
-        "SELECT partner_id FROM app_couples_bucket_list__partner_config WHERE member_id = ?",
-        [ME.id]
-      );
-      return rows.length ? (members.find(m => m.id === rows[0].partner_id) ?? null) : null;
+      const res = await fetch(`/run/${APP_ID}/api/partner`);
+      const status = res.ok ? await res.json() : { partner_id: null, reciprocal: false };
+      partnerReciprocal = status.reciprocal;
+      return status.partner_id ? (members.find(m => m.id === status.partner_id) ?? null) : null;
     }
 
     async function loadItems() {
@@ -275,14 +275,20 @@
       const btn = document.querySelector('#view-setup .btn-primary');
       if (btn) { btn.disabled = true; btn.textContent = "Saving…"; }
       try {
-        if (ME) {
-          await db(
-            `INSERT INTO app_couples_bucket_list__partner_config (member_id, partner_id) VALUES (?, ?)
-             ON CONFLICT (member_id) DO UPDATE SET partner_id = EXCLUDED.partner_id`,
-            [ME.id, partnerId]
-          );
-        }
+        const res = ME ? await fetch(`/run/${APP_ID}/api/partner`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ partner_id: partnerId }),
+        }) : null;
+        if (res && !res.ok) throw new Error((await res.json()).error ?? "Could not save partner");
+        const status = res ? await res.json() : { reciprocal: true };
+        partnerReciprocal = status.reciprocal;
         partner = members.find(m => m.id === partnerId) ?? null;
+        if (!partnerReciprocal) {
+          alert(`Waiting for ${partner?.name ?? "your partner"} to choose you too.`);
+          if (btn) { btn.disabled = false; btn.textContent = "Check Again"; }
+          window.showSetup();
+          return;
+        }
         await loadItems();
         showMain();
       } catch(e) {
@@ -349,8 +355,8 @@
       if (!ME) return;
       try {
         await db(
-          "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at) VALUES (?, ?, ?, ?, ?, ?)",
-          [id, ME.id, title, notes, category, now]
+          "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, session_id, title, notes, category, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+          [id, ME.id, null, title, notes, category, now]
         );
       } catch {
         items = items.filter(i => i !== optimisticItem);
@@ -538,7 +544,7 @@
     (async () => {
       await loadMembers();
       partner = await loadPartner();
-      if (!partner) {
+      if (!partner || !partnerReciprocal) {
         window.showSetup();
       } else {
         await loadItems();
