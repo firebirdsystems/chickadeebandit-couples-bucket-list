@@ -284,9 +284,9 @@
         partnerReciprocal = status.reciprocal;
         partner = members.find(m => m.id === partnerId) ?? null;
         if (!partnerReciprocal) {
-          alert(`Waiting for ${partner?.name ?? "your partner"} to choose you too.`);
           if (btn) { btn.disabled = false; btn.textContent = "Check Again"; }
           window.showSetup();
+          showWaitingForPartner();
           return;
         }
         await loadItems();
@@ -307,6 +307,20 @@
       document.body.appendChild(modalEl);
     }
     window.closeModal = function() { modalEl?.remove(); modalEl = null; };
+
+    window.showWaitingForPartner = function() {
+      const name = esc(partner?.name ?? "your partner");
+      openModal(`
+        <h3>Waiting for ${name}</h3>
+        <p style="color:var(--hub-text-muted,#6b7280);font-size:.9rem;line-height:1.5;margin-top:8px">
+          You've chosen ${name}. As soon as they choose you back, you'll be paired up and your shared bucket list will appear.
+        </p>
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="closeModal()">Close</button>
+          <button class="btn-primary" onclick="closeModal(); savePartner()">Check Again</button>
+        </div>
+      `);
+    };
 
     // ── Add item ──────────────────────────────────────────────────────────────
     window.openAddItem = function() {
