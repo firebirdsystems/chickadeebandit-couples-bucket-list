@@ -1,0 +1,45 @@
+{
+  "scenarios": [
+    {
+      "name": "reciprocal partners see each other's bucket items; outsiders see nothing",
+      "members": { "a": "adult", "b": "adult", "outsider": "adult" },
+      "steps": [
+        {
+          "action": "seedRaw",
+          "sql": "INSERT INTO app_couples_bucket_list__partner_config (member_id, partner_id, session_id) VALUES (?, ?, ?)",
+          "params": ["{{a}}", "{{b}}", "sess-ab"]
+        },
+        {
+          "action": "seedRaw",
+          "sql": "INSERT INTO app_couples_bucket_list__partner_config (member_id, partner_id, session_id) VALUES (?, ?, ?)",
+          "params": ["{{b}}", "{{a}}", "sess-ab"]
+        },
+        {
+          "action": "db",
+          "as": "a",
+          "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, created_at, session_id) VALUES (?, ?, ?, ?, ?)",
+          "params": ["bi1", "{{a}}", "Skydiving", "2026-01-01T00:00:00Z", "sess-ab"],
+          "expect": { "status": 200 }
+        },
+        {
+          "action": "db",
+          "as": "b",
+          "sql": "SELECT id FROM app_couples_bucket_list__bucket_items",
+          "expect": { "status": 200, "rowCount": 1, "rowsContain": [{ "id": "bi1" }] }
+        },
+        {
+          "action": "db",
+          "as": "outsider",
+          "sql": "SELECT id FROM app_couples_bucket_list__bucket_items",
+          "expect": { "status": 200, "rowCount": 0 }
+        },
+        {
+          "action": "db",
+          "as": "a",
+          "sql": "SELECT id FROM app_couples_bucket_list__bucket_items",
+          "expect": { "status": 200, "rowCount": 1 }
+        }
+      ]
+    }
+  ]
+}
