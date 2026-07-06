@@ -379,9 +379,19 @@
     };
 
     // ── Mark done ─────────────────────────────────────────────────────────────
+    let markDoneId = null;   // item currently open in the "mark done" modal
+    // Item ids come from the DB (attacker-writable via raw /api/db), so the check
+    // control carries the id in a data-* attribute read back here, rather than
+    // interpolating it into an inline onclick JS string (esc() does not neutralise
+    // a JS-string context — a single quote survives HTML-attribute decoding).
+    document.body.addEventListener("click", (e) => {
+      const t = e.target.closest("[data-mark-done]");
+      if (t) window.openMarkDone(t.getAttribute("data-mark-done"));
+    });
     window.openMarkDone = function(id) {
       const item = items.find(i => i.id === id);
       if (!item) return;
+      markDoneId = id;
       const uploadHtml = window.__FILES_URL
         ? `<div class="form-group">
              <label>Photo <span style="color:var(--hub-text-muted,#6b7280);font-weight:400">(optional)</span></label>
@@ -400,7 +410,7 @@
         ${uploadHtml}
         <div class="modal-actions">
           <button class="btn-secondary" onclick="closeModal()">Cancel</button>
-          <button class="btn-primary" onclick="confirmDone('${esc(id)}')">Done! ✓</button>
+          <button class="btn-primary" onclick="confirmDone()">Done! ✓</button>
         </div>
       `);
     };
@@ -414,7 +424,7 @@
       preview.style.display = "block";
     };
 
-    window.confirmDone = async function(id) {
+    window.confirmDone = async function(id = markDoneId) {
       const btn = modalEl?.querySelector(".modal-actions .btn-primary");
       if (btn) { btn.disabled = true; btn.textContent = "Saving…"; }
       try {
@@ -535,7 +545,7 @@
     }
 
     function renderItemCard(item, isDone) {
-      const checkHtml = `<span class="item-check${isDone ? " done" : ""}" onclick="${isDone ? "" : `openMarkDone('${esc(item.id)}')`}" style="cursor:${isDone ? "default" : "pointer"}">${isDone ? "✓" : ""}</span>`;
+      const checkHtml = `<span class="item-check${isDone ? " done" : ""}" ${isDone ? "" : `data-mark-done="${esc(item.id)}"`} style="cursor:${isDone ? "default" : "pointer"}">${isDone ? "✓" : ""}</span>`;
       const notesHtml  = item.notes ? `<div class="item-notes">${esc(item.notes)}</div>` : "";
       const doneNoteHtml = item.done_note ? `<div class="item-done-note">"${esc(item.done_note)}"</div>` : "";
       const photoHtml  = item.photo_id
