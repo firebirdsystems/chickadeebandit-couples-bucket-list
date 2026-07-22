@@ -1,5 +1,6 @@
 {
   "id": "couples-bucket-list",
+  "contexts": ["household", "shared_space"],
   "name": "Couple's Bucket List",
   "version": "1.0.0",
   "description": "A shared wishlist of experiences — travel, food, skills, milestones — that you want to do together.",
