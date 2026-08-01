@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { CATEGORIES, validateItem, categoryLabel, groupByCategory } from "../src/logic.js";
+import { CATEGORIES, validateItem, categoryLabel, groupByCategory, searchableFields } from "../src/logic.js";
 
 describe("validateItem", () => {
   it("rejects empty and whitespace-only titles", () => {
@@ -55,5 +55,13 @@ describe("groupByCategory", () => {
   it("covers every declared category value", () => {
     const items = CATEGORIES.map((c, i) => ({ id: i, category: c.value }));
     expect(groupByCategory(items).map((g) => g.category)).toEqual(CATEGORIES.map((c) => c.value));
+  });
+});
+
+describe("searchableFields", () => {
+  it("matches on the notes and category, not just the title", () => {
+    const fields = searchableFields({ title: "Northern lights", notes: "Tromso in February", category: "travel", done_note: "" });
+    expect(fields).toContain("Tromso in February");
+    expect(fields).toContain("travel");
   });
 });

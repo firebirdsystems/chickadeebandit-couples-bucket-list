@@ -27,3 +27,12 @@ export function groupByCategory(items) {
   }
   return order.filter(k => map[k]?.length).map(k => ({ category: k, items: map[k] }));
 }
+
+/**
+ * Fields the in-app search matches against (see hub-sdk `searchMatch`).
+ * Notes and category count as well as the title — a bucket list is
+ * browsed as "the travel ones" or by the detail written under an idea.
+ */
+export function searchableFields(item) {
+  return [item.title, item.notes, item.category, item.done_note];
+}
