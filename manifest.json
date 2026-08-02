@@ -57,6 +57,13 @@
     "bucket_items": ["photo_id"]
   },
   "icon": "🪣",
+  "glance": {
+    "source": {
+      "kind": "sql",
+      "query": "SELECT COUNT(*) AS n FROM app_couples_bucket_list__bucket_items WHERE done_at IS NULL OR done_at = '' LIMIT 1"
+    },
+    "display": { "template": "badge", "count": "n", "label": "still to do together", "severity": "info" }
+  },
   "nav": { "label": "Bucket List" },
   "kiosk": "never"
 }
