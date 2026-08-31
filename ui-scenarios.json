@@ -1,0 +1,164 @@
+{
+  "scenarios": [
+    {
+      "name": "a one-sided pairing does not open the shared list",
+      "members": {
+        "a": "adult",
+        "b": "adult"
+      },
+      "steps": [
+        {
+          "action": "seedRaw",
+          "sql": "INSERT INTO app_couples_bucket_list__partner_config (member_id, partner_id, session_id) VALUES (?, ?, ?)",
+          "params": [
+            "{{a}}",
+            "{{b}}",
+            "sess-ab"
+          ]
+        },
+        {
+          "action": "open",
+          "as": "a"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "[data-testid=\"view-setup\"]",
+          "as": "a"
+        },
+        {
+          "action": "seedRaw",
+          "sql": "INSERT INTO app_couples_bucket_list__partner_config (member_id, partner_id, session_id) VALUES (?, ?, ?)",
+          "params": [
+            "{{b}}",
+            "{{a}}",
+            "sess-ab"
+          ]
+        },
+        {
+          "action": "reload",
+          "as": "a"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "[data-testid=\"view-main\"]",
+          "as": "a"
+        }
+      ]
+    },
+    {
+      "name": "a completed item is tallied but stays out of the list until the section is expanded",
+      "members": {
+        "a": "adult",
+        "b": "adult"
+      },
+      "steps": [
+        {
+          "action": "seedRaw",
+          "sql": "INSERT INTO app_couples_bucket_list__partner_config (member_id, partner_id, session_id) VALUES (?, ?, ?)",
+          "params": [
+            "{{a}}",
+            "{{b}}",
+            "sess-ab"
+          ]
+        },
+        {
+          "action": "seedRaw",
+          "sql": "INSERT INTO app_couples_bucket_list__partner_config (member_id, partner_id, session_id) VALUES (?, ?, ?)",
+          "params": [
+            "{{b}}",
+            "{{a}}",
+            "sess-ab"
+          ]
+        },
+        {
+          "action": "seedRaw",
+          "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, category, done_at, created_at, session_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+          "params": [
+            "i1",
+            "{{a}}",
+            "See the northern lights",
+            "travel",
+            null,
+            "2026-01-01T00:00:00Z",
+            "sess-ab"
+          ]
+        },
+        {
+          "action": "seedRaw",
+          "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, category, done_at, created_at, session_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+          "params": [
+            "i2",
+            "{{b}}",
+            "Take a cooking class",
+            "skill",
+            null,
+            "2026-01-02T00:00:00Z",
+            "sess-ab"
+          ]
+        },
+        {
+          "action": "seedRaw",
+          "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, category, done_at, created_at, session_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+          "params": [
+            "i3",
+            "{{a}}",
+            "Try omakase sushi",
+            "food",
+            "2026-01-03T00:00:00Z",
+            "2026-01-01T00:00:00Z",
+            "sess-ab"
+          ]
+        },
+        {
+          "action": "open",
+          "as": "b"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "[data-testid=\"view-main\"]",
+          "as": "b"
+        },
+        {
+          "action": "expectCount",
+          "selector": "[data-testid=\"item-card\"][data-done=\"no\"]",
+          "count": 2,
+          "as": "b"
+        },
+        {
+          "action": "expectCount",
+          "selector": "[data-testid=\"item-card\"][data-item-id=\"i3\"]",
+          "count": 0,
+          "as": "b"
+        },
+        {
+          "action": "expectText",
+          "selector": "[data-testid=\"progress-label\"]",
+          "text": "1 / 3 done",
+          "as": "b"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "[data-testid=\"completed-toggle\"]",
+          "as": "b"
+        },
+        {
+          "action": "click",
+          "selector": "[data-testid=\"completed-toggle\"]",
+          "as": "b"
+        },
+        {
+          "action": "expectCount",
+          "selector": "[data-testid=\"item-card\"][data-item-id=\"i3\"][data-done=\"yes\"]",
+          "count": 1,
+          "as": "b"
+        },
+        {
+          "action": "expectText",
+          "selector": "[data-testid=\"item-card\"][data-item-id=\"i3\"]",
+          "text": "Try omakase sushi",
+          "as": "b"
+        }
+      ]
+    }
+  ]
+}

@@ -176,7 +176,7 @@
 <body>
 
   <!-- ── Setup view ── -->
-  <div id="view-setup" class="view">
+  <div id="view-setup" class="view" data-testid="view-setup">
     <div class="setup-wrap">
       <div class="setup-card">
         <div class="setup-icon">🪣</div>
@@ -190,7 +190,7 @@
   </div>
 
   <!-- ── Main view ── -->
-  <div id="view-main" class="view">
+  <div id="view-main" class="view" data-testid="view-main">
     <div class="app-header">
       <div class="app-header-left">
         <span class="icon">🪣</span>
@@ -536,7 +536,7 @@ let searchQ = "";       // in-app search (see logic.js searchableFields)
         const pct = Math.round((doneCount / total) * 100);
         progressEl.innerHTML = `
           <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
-          <span class="progress-label">${doneCount} / ${total} done</span>`;
+          <span class="progress-label" data-testid="progress-label">${doneCount} / ${total} done</span>`;
       } else {
         progressEl.innerHTML = "";
       }
@@ -563,7 +563,7 @@ let searchQ = "";       // in-app search (see logic.js searchableFields)
         ? `<div class="items-list">${completed.map(item => renderItemCard(item, true)).join("")}</div>`
         : "";
       compEl.innerHTML = `
-        <button class="completed-toggle" onclick="toggleCompleted()">
+        <button class="completed-toggle" data-testid="completed-toggle" onclick="toggleCompleted()">
           ${completedVisible ? "▾" : "▸"} Completed (${doneCount})
         </button>
         ${listHtml}`;
@@ -580,7 +580,7 @@ let searchQ = "";       // in-app search (see logic.js searchableFields)
         ? `<div class="item-meta">Completed ${formatRelativeDate(item.done_at)}</div>`
         : `<div class="item-meta">Added ${formatRelativeDate(item.created_at)}</div>`;
       return `
-        <div class="item-card">
+        <div class="item-card" data-testid="item-card" data-item-id="${esc(item.id)}" data-done="${isDone ? "yes" : "no"}">
           <div class="item-header">
             ${checkHtml}
             <span class="item-title${isDone ? " done" : ""}">${esc(item.title)}</span>
