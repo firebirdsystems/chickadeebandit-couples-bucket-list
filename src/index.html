@@ -272,10 +272,13 @@ let searchQ = "";       // in-app search (see logic.js searchableFields)
         ];
         return;
       }
-      const { rows } = await db(
-        "SELECT * FROM app_couples_bucket_list__bucket_items WHERE created_by IN (?, ?) ORDER BY created_at DESC",
-        [ME.id, partner.id]
-      );
+      // No WHERE: the couple_scoped row policy already scopes this read to
+      // created_by IN (me, partner) within the active pairing session, which is
+      // the only state this runs in (init reaches here only when reciprocal).
+      // A partner-id param could not be declared in manifest.preload (only
+      // :me/:today resolve there), so the filter would cost the preload.
+      // __tests__/preload.test.mjs pins the policy this depends on.
+      const { rows } = await db("SELECT * FROM app_couples_bucket_list__bucket_items ORDER BY created_at DESC");
       items = rows;
     }
 
