@@ -1,0 +1,653 @@
+{
+ "seed": [
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__partner_config (member_id, partner_id, session_id) VALUES (?, ?, ?)",
+   "params": [
+    "{{me}}",
+    "{{partner}}",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__partner_config (member_id, partner_id, session_id) VALUES (?, ?, ?)",
+   "params": [
+    "{{partner}}",
+    "{{me}}",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT09:01:00Z','now','-40 days'), ?)",
+   "params": [
+    "perf-bl-01",
+    "{{me}}",
+    "See the northern lights",
+    "Saw this in a magazine and can't stop thinking about it",
+    "travel",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT10:02:00Z','now','-77 days'), ?)",
+   "params": [
+    "perf-bl-02",
+    "{{me}}",
+    "Road trip down the Pacific coast",
+    "Need to save up first",
+    "travel",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT11:03:00Z','now','-114 days'), ?)",
+   "params": [
+    "perf-bl-03",
+    "{{partner}}",
+    "Sleep in an overwater bungalow",
+    "Spring would be best",
+    "travel",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, done_at, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT18:30:00Z','now','-145 days'), strftime('%Y-%m-%dT12:04:00Z','now','-151 days'), ?)",
+   "params": [
+    "perf-bl-04",
+    "{{me}}",
+    "Take the night train to Vienna",
+    "Your sister recommended it",
+    "travel",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, category, created_at, session_id) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT13:05:00Z','now','-18 days'), ?)",
+   "params": [
+    "perf-bl-05",
+    "{{me}}",
+    "Hike to Machu Picchu",
+    "travel",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, category, created_at, session_id) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT14:06:00Z','now','-55 days'), ?)",
+   "params": [
+    "perf-bl-06",
+    "{{partner}}",
+    "Spend a week in Kyoto in autumn",
+    "travel",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT15:07:00Z','now','-92 days'), ?)",
+   "params": [
+    "perf-bl-07",
+    "{{me}}",
+    "Visit every national park in Utah",
+    "Maybe for our anniversary",
+    "travel",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, done_at, done_note, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT18:30:00Z','now','-119 days'), ?, strftime('%Y-%m-%dT16:08:00Z','now','-129 days'), ?)",
+   "params": [
+    "perf-bl-08",
+    "{{me}}",
+    "Swim in the Blue Lagoon",
+    "Saw this in a magazine and can't stop thinking about it",
+    "travel",
+    "Took three tries but we did it",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT17:09:00Z','now','-166 days'), ?)",
+   "params": [
+    "perf-bl-09",
+    "{{partner}}",
+    "See the cherry blossoms in DC",
+    "Need to save up first",
+    "travel",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT18:10:00Z','now','-33 days'), ?)",
+   "params": [
+    "perf-bl-10",
+    "{{me}}",
+    "Rent a cabin in the Dolomites",
+    "Spring would be best",
+    "travel",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT19:11:00Z','now','-70 days'), ?)",
+   "params": [
+    "perf-bl-11",
+    "{{me}}",
+    "Safari in Tanzania",
+    "Your sister recommended it",
+    "travel",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, category, done_at, done_note, created_at, session_id) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT18:30:00Z','now','-93 days'), ?, strftime('%Y-%m-%dT08:12:00Z','now','-107 days'), ?)",
+   "params": [
+    "perf-bl-12",
+    "{{partner}}",
+    "Christmas markets in Strasbourg",
+    "travel",
+    "10/10, would do again",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, category, created_at, session_id) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT09:13:00Z','now','-144 days'), ?)",
+   "params": [
+    "perf-bl-13",
+    "{{me}}",
+    "Drive the Ring Road in Iceland",
+    "travel",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT10:14:00Z','now','-11 days'), ?)",
+   "params": [
+    "perf-bl-14",
+    "{{me}}",
+    "Lisbon for a long weekend",
+    "Maybe for our anniversary",
+    "travel",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT11:15:00Z','now','-48 days'), ?)",
+   "params": [
+    "perf-bl-15",
+    "{{partner}}",
+    "Sail the Greek islands",
+    "Saw this in a magazine and can't stop thinking about it",
+    "travel",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, done_at, done_note, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT18:30:00Z','now','-67 days'), ?, strftime('%Y-%m-%dT12:16:00Z','now','-85 days'), ?)",
+   "params": [
+    "perf-bl-16",
+    "{{me}}",
+    "Try omakase sushi",
+    "Need to save up first",
+    "food",
+    "Rained the whole time and we loved it anyway",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT13:17:00Z','now','-122 days'), ?)",
+   "params": [
+    "perf-bl-17",
+    "{{me}}",
+    "Eat at a three-star restaurant",
+    "Spring would be best",
+    "food",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT14:18:00Z','now','-159 days'), ?)",
+   "params": [
+    "perf-bl-18",
+    "{{partner}}",
+    "Make fresh pasta from scratch",
+    "Your sister recommended it",
+    "food",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, category, created_at, session_id) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT15:19:00Z','now','-26 days'), ?)",
+   "params": [
+    "perf-bl-19",
+    "{{me}}",
+    "Do a taco crawl across the city",
+    "food",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, category, done_at, done_note, created_at, session_id) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT18:30:00Z','now','-41 days'), ?, strftime('%Y-%m-%dT16:20:00Z','now','-63 days'), ?)",
+   "params": [
+    "perf-bl-20",
+    "{{me}}",
+    "Tour a vineyard in Napa",
+    "food",
+    "Even better than we imagined",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT17:21:00Z','now','-100 days'), ?)",
+   "params": [
+    "perf-bl-21",
+    "{{partner}}",
+    "Bake a croquembouche",
+    "Maybe for our anniversary",
+    "food",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT18:22:00Z','now','-137 days'), ?)",
+   "params": [
+    "perf-bl-22",
+    "{{me}}",
+    "Find the best ramen in town",
+    "Saw this in a magazine and can't stop thinking about it",
+    "food",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT19:23:00Z','now','-4 days'), ?)",
+   "params": [
+    "perf-bl-23",
+    "{{me}}",
+    "Host a ten-course dinner party",
+    "Need to save up first",
+    "food",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, done_at, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT18:30:00Z','now','-15 days'), strftime('%Y-%m-%dT08:24:00Z','now','-41 days'), ?)",
+   "params": [
+    "perf-bl-24",
+    "{{partner}}",
+    "Take a whisky tasting flight",
+    "Spring would be best",
+    "food",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT09:25:00Z','now','-78 days'), ?)",
+   "params": [
+    "perf-bl-25",
+    "{{me}}",
+    "Eat street food in Bangkok",
+    "Your sister recommended it",
+    "food",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, category, created_at, session_id) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT10:26:00Z','now','-115 days'), ?)",
+   "params": [
+    "perf-bl-26",
+    "{{me}}",
+    "Brew our own beer",
+    "food",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, category, created_at, session_id) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT11:27:00Z','now','-152 days'), ?)",
+   "params": [
+    "perf-bl-27",
+    "{{partner}}",
+    "Dim sum for breakfast in Hong Kong",
+    "food",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, done_at, done_note, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT18:30:00Z','now','-1 days'), ?, strftime('%Y-%m-%dT12:28:00Z','now','-19 days'), ?)",
+   "params": [
+    "perf-bl-28",
+    "{{me}}",
+    "Take a cooking class",
+    "Maybe for our anniversary",
+    "skill",
+    "Took three tries but we did it",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT13:29:00Z','now','-56 days'), ?)",
+   "params": [
+    "perf-bl-29",
+    "{{me}}",
+    "Learn to salsa dance",
+    "Saw this in a magazine and can't stop thinking about it",
+    "skill",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT14:30:00Z','now','-93 days'), ?)",
+   "params": [
+    "perf-bl-30",
+    "{{partner}}",
+    "Get scuba certified",
+    "Need to save up first",
+    "skill",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT15:31:00Z','now','-130 days'), ?)",
+   "params": [
+    "perf-bl-31",
+    "{{me}}",
+    "Learn conversational Italian",
+    "Spring would be best",
+    "skill",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, done_at, done_note, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT18:30:00Z','now','-163 days'), ?, strftime('%Y-%m-%dT16:32:00Z','now','-167 days'), ?)",
+   "params": [
+    "perf-bl-32",
+    "{{me}}",
+    "Take a pottery wheel class",
+    "Your sister recommended it",
+    "skill",
+    "10/10, would do again",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, category, created_at, session_id) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT17:33:00Z','now','-34 days'), ?)",
+   "params": [
+    "perf-bl-33",
+    "{{partner}}",
+    "Learn to sail a dinghy",
+    "skill",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, category, created_at, session_id) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT18:34:00Z','now','-71 days'), ?)",
+   "params": [
+    "perf-bl-34",
+    "{{me}}",
+    "Do a couples massage course",
+    "skill",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT19:35:00Z','now','-108 days'), ?)",
+   "params": [
+    "perf-bl-35",
+    "{{me}}",
+    "Finish a 1000-piece puzzle in a day",
+    "Maybe for our anniversary",
+    "skill",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, done_at, done_note, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT18:30:00Z','now','-137 days'), ?, strftime('%Y-%m-%dT08:36:00Z','now','-145 days'), ?)",
+   "params": [
+    "perf-bl-36",
+    "{{partner}}",
+    "Learn to make sourdough",
+    "Saw this in a magazine and can't stop thinking about it",
+    "skill",
+    "Rained the whole time and we loved it anyway",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT09:37:00Z','now','-12 days'), ?)",
+   "params": [
+    "perf-bl-37",
+    "{{me}}",
+    "Take a beginner surf lesson",
+    "Need to save up first",
+    "skill",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT10:38:00Z','now','-49 days'), ?)",
+   "params": [
+    "perf-bl-38",
+    "{{me}}",
+    "Learn sign language basics",
+    "Spring would be best",
+    "skill",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT11:39:00Z','now','-86 days'), ?)",
+   "params": [
+    "perf-bl-39",
+    "{{partner}}",
+    "Buy our first home",
+    "Your sister recommended it",
+    "milestone",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, category, done_at, done_note, created_at, session_id) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT18:30:00Z','now','-111 days'), ?, strftime('%Y-%m-%dT12:40:00Z','now','-123 days'), ?)",
+   "params": [
+    "perf-bl-40",
+    "{{me}}",
+    "Run a half marathon together",
+    "milestone",
+    "Even better than we imagined",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, category, created_at, session_id) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT13:41:00Z','now','-160 days'), ?)",
+   "params": [
+    "perf-bl-41",
+    "{{me}}",
+    "Renew our vows on the beach",
+    "milestone",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT14:42:00Z','now','-27 days'), ?)",
+   "params": [
+    "perf-bl-42",
+    "{{partner}}",
+    "Adopt a dog",
+    "Maybe for our anniversary",
+    "milestone",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT15:43:00Z','now','-64 days'), ?)",
+   "params": [
+    "perf-bl-43",
+    "{{me}}",
+    "Pay off the car",
+    "Saw this in a magazine and can't stop thinking about it",
+    "milestone",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, done_at, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT18:30:00Z','now','-85 days'), strftime('%Y-%m-%dT16:44:00Z','now','-101 days'), ?)",
+   "params": [
+    "perf-bl-44",
+    "{{me}}",
+    "Plant a tree for each anniversary",
+    "Need to save up first",
+    "milestone",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT17:45:00Z','now','-138 days'), ?)",
+   "params": [
+    "perf-bl-45",
+    "{{partner}}",
+    "Write letters to open in ten years",
+    "Spring would be best",
+    "milestone",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT18:46:00Z','now','-5 days'), ?)",
+   "params": [
+    "perf-bl-46",
+    "{{me}}",
+    "Throw a 10th anniversary party",
+    "Your sister recommended it",
+    "milestone",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, category, created_at, session_id) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT19:47:00Z','now','-42 days'), ?)",
+   "params": [
+    "perf-bl-47",
+    "{{me}}",
+    "Make a photo book of every year",
+    "milestone",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, category, done_at, done_note, created_at, session_id) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT18:30:00Z','now','-59 days'), ?, strftime('%Y-%m-%dT08:48:00Z','now','-79 days'), ?)",
+   "params": [
+    "perf-bl-48",
+    "{{partner}}",
+    "Watch the sunrise from a hot air balloon",
+    "other",
+    "Took three tries but we did it",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT09:49:00Z','now','-116 days'), ?)",
+   "params": [
+    "perf-bl-49",
+    "{{me}}",
+    "See a total solar eclipse",
+    "Maybe for our anniversary",
+    "other",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT10:50:00Z','now','-153 days'), ?)",
+   "params": [
+    "perf-bl-50",
+    "{{me}}",
+    "Go to a drive-in movie",
+    "Saw this in a magazine and can't stop thinking about it",
+    "other",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT11:51:00Z','now','-20 days'), ?)",
+   "params": [
+    "perf-bl-51",
+    "{{partner}}",
+    "Stargaze in a dark-sky park",
+    "Need to save up first",
+    "other",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, done_at, done_note, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT18:30:00Z','now','-33 days'), ?, strftime('%Y-%m-%dT12:52:00Z','now','-57 days'), ?)",
+   "params": [
+    "perf-bl-52",
+    "{{me}}",
+    "Camp on the beach",
+    "Spring would be best",
+    "other",
+    "10/10, would do again",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT13:53:00Z','now','-94 days'), ?)",
+   "params": [
+    "perf-bl-53",
+    "{{me}}",
+    "Ride a tandem bike",
+    "Your sister recommended it",
+    "other",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, category, created_at, session_id) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT14:54:00Z','now','-131 days'), ?)",
+   "params": [
+    "perf-bl-54",
+    "{{partner}}",
+    "See our favourite band live",
+    "other",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, category, created_at, session_id) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT15:55:00Z','now','-168 days'), ?)",
+   "params": [
+    "perf-bl-55",
+    "{{me}}",
+    "Volunteer at the animal shelter together",
+    "other",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, done_at, done_note, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT18:30:00Z','now','-7 days'), ?, strftime('%Y-%m-%dT16:56:00Z','now','-35 days'), ?)",
+   "params": [
+    "perf-bl-56",
+    "{{me}}",
+    "Build a piece of furniture",
+    "Maybe for our anniversary",
+    "other",
+    "Rained the whole time and we loved it anyway",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT17:57:00Z','now','-72 days'), ?)",
+   "params": [
+    "perf-bl-57",
+    "{{partner}}",
+    "Go to a murder mystery dinner",
+    "Saw this in a magazine and can't stop thinking about it",
+    "other",
+    "perf-bucket-session"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, notes, category, created_at, session_id) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT18:58:00Z','now','-109 days'), ?)",
+   "params": [
+    "perf-bl-58",
+    "{{me}}",
+    "Spend a whole day with phones off",
+    "Need to save up first",
+    "other",
+    "perf-bucket-session"
+   ]
+  }
+ ]
+}
