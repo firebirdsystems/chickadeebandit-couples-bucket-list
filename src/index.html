@@ -319,6 +319,14 @@ let searchQ = "";       // in-app search (see logic.js searchableFields)
       document.getElementById("load-error").hidden = true;
     }
 
+    // What a failed write shows: this app's own wording when the error carries
+    // it (`forUser`), otherwise one fixed line. The hub's error text only goes
+    // to the console.
+    function failText(e, line) {
+      if (!e?.forUser) console.error("[couples-bucket-list] write failed:", e);
+      return e?.forUser ? e.message : line;
+    }
+
     window.savePartner = async function() {
       const sel = document.querySelector('#setup-members input[type="radio"]:checked');
       if (!sel) return;
@@ -344,7 +352,7 @@ let searchQ = "";       // in-app search (see logic.js searchableFields)
         showMain();
       } catch(e) {
         if (btn) { btn.disabled = false; btn.textContent = "Get Started"; }
-        hubAlert(e.message);
+        hubAlert(failText(e, "Couldn’t save your partner — try again."));
       }
     };
 
@@ -426,7 +434,7 @@ let searchQ = "";       // in-app search (see logic.js searchableFields)
       } catch (e) {
         items = items.filter(i => i !== optimisticItem);
         renderItems();
-        hubAlert("That could not be added.", { description: e.message });
+        hubAlert(failText(e, "Couldn’t add that — try again."));
       }
     };
 
@@ -487,7 +495,9 @@ let searchQ = "";       // in-app search (see logic.js searchableFields)
 
         let photoId = null, thumbId = null;
         if (photoFile) {
-          const up = await files.upload(photoFile, { thumbnail: true });
+          // An upload the hub refuses (too large, wrong type, too many, storage
+          // full) says why in its own words, and those are shown.
+          const up = await files.upload(photoFile, { thumbnail: true }).catch((e) => { throw Object.assign(e, { uploadRefused: [413, 415, 429, 507].includes(e?.status) }); });
           photoId = up.id;
           thumbId = up.thumbnailId ?? null;
         }
@@ -503,11 +513,11 @@ let searchQ = "";       // in-app search (see logic.js searchableFields)
               const res = await db("UPDATE app_couples_bucket_list__bucket_items SET done_at = ?, done_note = ?, photo_id = ?, thumb_file_id = ? WHERE id = ?",
                 [now, doneNote || null, null, null, id]);
               // The row policy narrows a write it will not allow to zero rows.
-              if (res.changed === 0) throw new Error("This can no longer be changed.");
+              if (res.changed === 0) throw Object.assign(new Error("This can no longer be changed."), { forUser: true });
             } catch (e) {
               if (origItem) Object.assign(item, origItem);
               renderItems();
-              hubAlert(e.message);
+              hubAlert(failText(e, "Couldn’t mark that done — try again."));
             }
           }
         } else {
@@ -515,14 +525,15 @@ let searchQ = "";       // in-app search (see logic.js searchableFields)
           if (ME) {
             const res = await db("UPDATE app_couples_bucket_list__bucket_items SET done_at = ?, done_note = ?, photo_id = ?, thumb_file_id = ? WHERE id = ?",
               [now, doneNote || null, photoId, thumbId, id]);
-            if (res.changed === 0) throw new Error("This can no longer be changed.");
+            if (res.changed === 0) throw Object.assign(new Error("This can no longer be changed."), { forUser: true });
             if (item) { item.done_at = now; item.done_note = doneNote || null; item.photo_id = photoId; item.thumb_file_id = thumbId; }
           }
           closeModal(); renderItems();
         }
       } catch(e) {
         if (btn) { btn.disabled = false; btn.innerHTML = `Done! ${glyph("tick", { accent: "currentColor" })}`; }
-        hubAlert(e.message);
+        if (e?.uploadRefused) { console.error("[couples-bucket-list] upload refused:", e); hubAlert("Couldn’t add the photo", { description: e.message }); }
+        else hubAlert(failText(e, "Couldn’t mark that done — try again."));
       }
     };
 
