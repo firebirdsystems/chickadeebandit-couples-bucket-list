@@ -36,3 +36,11 @@ export function groupByCategory(items) {
 export function searchableFields(item) {
   return [item.title, item.notes, item.category, item.done_note];
 }
+
+/**
+ * The picture to draw on an item's card: the small copy of its photo when
+ * one was kept, else the photo itself.
+ */
+export function tilePhotoId(item) {
+  return item?.thumb_file_id || item?.photo_id || "";
+}

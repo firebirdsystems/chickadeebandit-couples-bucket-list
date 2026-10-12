@@ -159,6 +159,134 @@
           "as": "b"
         }
       ]
+    },
+    {
+      "name": "a paired member whose list cannot be read is told so, not shown an empty list",
+      "members": {
+        "a": "adult",
+        "b": "adult"
+      },
+      "steps": [
+        {
+          "action": "seedRaw",
+          "sql": "INSERT INTO app_couples_bucket_list__partner_config (member_id, partner_id, session_id) VALUES (?, ?, ?)",
+          "params": [
+            "{{a}}",
+            "{{b}}",
+            "sess-ab"
+          ]
+        },
+        {
+          "action": "seedRaw",
+          "sql": "INSERT INTO app_couples_bucket_list__partner_config (member_id, partner_id, session_id) VALUES (?, ?, ?)",
+          "params": [
+            "{{b}}",
+            "{{a}}",
+            "sess-ab"
+          ]
+        },
+        {
+          "action": "seedRaw",
+          "sql": "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, title, category, done_at, created_at, session_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+          "params": [
+            "i1",
+            "{{a}}",
+            "See the northern lights",
+            "travel",
+            null,
+            "2026-01-01T00:00:00Z",
+            "sess-ab"
+          ]
+        },
+        {
+          "action": "open",
+          "as": "b"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "[data-testid=\"view-main\"]",
+          "as": "b"
+        },
+        {
+          "action": "expectText",
+          "selector": "[data-testid=\"item-card\"][data-item-id=\"i1\"]",
+          "text": "See the northern lights",
+          "as": "b"
+        },
+        {
+          "action": "expectHidden",
+          "selector": "[data-testid=\"load-error\"]",
+          "as": "b"
+        },
+        {
+          "action": "fault",
+          "mode": "down",
+          "as": "b"
+        },
+        {
+          "action": "reload",
+          "as": "b"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "[data-testid=\"load-error\"]",
+          "as": "b"
+        },
+        {
+          "action": "expectText",
+          "selector": "[data-testid=\"load-error\"]",
+          "text": "Couldn’t load your bucket list.",
+          "as": "b"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "[data-testid=\"view-main\"]",
+          "as": "b"
+        },
+        {
+          "action": "expectHidden",
+          "selector": "[data-testid=\"view-setup\"]",
+          "as": "b"
+        },
+        {
+          "action": "expectCount",
+          "selector": "[data-testid=\"empty-state\"]",
+          "count": 0,
+          "as": "b"
+        },
+        {
+          "action": "expectCount",
+          "selector": "[data-testid=\"item-card\"]",
+          "count": 0,
+          "as": "b"
+        },
+        {
+          "action": "fault",
+          "mode": "none",
+          "as": "b"
+        },
+        {
+          "action": "click",
+          "selector": "[data-testid=\"load-retry\"]",
+          "as": "b"
+        },
+        {
+          "action": "expectText",
+          "selector": "[data-testid=\"item-card\"][data-item-id=\"i1\"]",
+          "text": "See the northern lights",
+          "as": "b"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "[data-testid=\"view-main\"]",
+          "as": "b"
+        },
+        {
+          "action": "expectHidden",
+          "selector": "[data-testid=\"load-error\"]",
+          "as": "b"
+        }
+      ]
     }
   ]
 }

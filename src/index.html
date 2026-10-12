@@ -171,9 +171,21 @@
       background: var(--surface, var(--card, #fff)); color: var(--text, inherit);
     }
     .search-input:focus { outline: none; border-color: var(--accent, #6366f1); }
+    .load-error {
+      margin: 12px 16px; padding: 10px 14px; border-radius: var(--hub-radius, 8px);
+      background: var(--hub-tint-danger, #fee2e2); color: var(--hub-tint-danger-fg, #b91c1c);
+      font-size: 0.9rem; display: flex; gap: 10px; align-items: center; justify-content: space-between;
+    }
+    .load-error[hidden] { display: none; }
+    .load-error-retry {
+      background: none; border: 1px solid currentColor; border-radius: var(--hub-radius, 8px);
+      padding: 4px 10px; color: inherit; font: inherit; cursor: pointer; white-space: nowrap;
+    }
   </style>
 </head>
 <body>
+
+  <div id="load-error" class="load-error" data-testid="load-error" role="alert" hidden><span>Couldn’t load your partner.</span> <button type="button" class="load-error-retry" data-testid="load-retry">Try again</button></div>
 
   <!-- ── Setup view ── -->
   <div id="view-setup" class="view" data-testid="view-setup">
@@ -212,8 +224,8 @@
   </div>
 
   <script type="module">
-    import { esc, initial, memberColor, formatRelativeDate, createFilesHelper, searchMatch, glyph, chickadee } from "/hub-sdk.js";
-    import { CATEGORIES, validateItem, categoryLabel, groupByCategory, searchableFields } from "./logic.js";
+    import { esc, initial, memberColor, formatRelativeDate, createFilesHelper, searchMatch, glyph, chickadee, hubAlert } from "/hub-sdk.js";
+    import { CATEGORIES, validateItem, categoryLabel, groupByCategory, searchableFields, tilePhotoId } from "./logic.js";
 
     // Static markup cannot call the SDK, so its marks are drawn here.
     document.getElementById("setup-icon").innerHTML = chickadee("pair", { size: 80 });
@@ -242,7 +254,9 @@ let searchQ = "";       // in-app search (see logic.js searchableFields)
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sql, params }),
       });
-      return res.json();
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json || typeof json !== "object" || json.error) throw new Error(json?.error || "Couldn’t reach the hub. Try again.");
+      return json;
     }
 
     async function loadMembers() {
@@ -254,16 +268,20 @@ let searchQ = "";       // in-app search (see logic.js searchableFields)
         ];
         return;
       }
-      try {
-        const res = await fetch(`${CONTEXT}?keys=family.members`);
-        members = ((await res.json())["family.members"]) ?? [];
-      } catch { members = []; }
+      const res = await fetch(`${CONTEXT}?keys=family.members`);
+      const ctx = await res.json().catch(() => null);
+      if (!res.ok || !ctx || typeof ctx !== "object" || ctx.$errors?.length) throw new Error("Couldn’t reach the hub. Try again.");
+      members = ctx["family.members"] ?? [];
     }
 
+    // An unpaired member is answered 200 with partner_id null. Any other answer
+    // is a failed read and throws: it is not "no partner yet".
     async function loadPartner() {
       if (!ME) return null;
       const res = await fetch(`/run/${APP_ID}/api/partner`);
-      const status = res.ok ? await res.json() : { partner_id: null, reciprocal: false };
+      if (!res.ok) throw new Error("partner unavailable");
+      const status = await res.json();
+      if (!status || typeof status !== "object" || !("partner_id" in status)) throw new Error("partner unavailable");
       partnerReciprocal = status.reciprocal;
       return status.partner_id ? (members.find(m => m.id === status.partner_id) ?? null) : null;
     }
@@ -271,9 +289,9 @@ let searchQ = "";       // in-app search (see logic.js searchableFields)
     async function loadItems() {
       if (!ME || !partner) {
         items = [
-          { id: "d1", created_by: "demo-1", title: "See the Northern Lights", notes: "Iceland or Norway", category: "travel", done_at: null, done_note: null, photo_id: null, created_at: new Date(Date.now() - 86400000).toISOString() },
-          { id: "d2", created_by: "demo-2", title: "Take a cooking class together", notes: "Italian or Thai", category: "skill", done_at: null, done_note: null, photo_id: null, created_at: new Date(Date.now() - 172800000).toISOString() },
-          { id: "d3", created_by: "demo-1", title: "Try omakase sushi", notes: "", category: "food", done_at: new Date(Date.now() - 604800000).toISOString(), done_note: "Amazing experience! 10/10", photo_id: null, created_at: new Date(Date.now() - 700000000).toISOString() },
+          { id: "d1", created_by: "demo-1", title: "See the Northern Lights", notes: "Iceland or Norway", category: "travel", done_at: null, done_note: null, photo_id: null, thumb_file_id: null, created_at: new Date(Date.now() - 86400000).toISOString() },
+          { id: "d2", created_by: "demo-2", title: "Take a cooking class together", notes: "Italian or Thai", category: "skill", done_at: null, done_note: null, photo_id: null, thumb_file_id: null, created_at: new Date(Date.now() - 172800000).toISOString() },
+          { id: "d3", created_by: "demo-1", title: "Try omakase sushi", notes: "", category: "food", done_at: new Date(Date.now() - 604800000).toISOString(), done_note: "Amazing experience! 10/10", photo_id: null, thumb_file_id: null, created_at: new Date(Date.now() - 700000000).toISOString() },
         ];
         return;
       }
@@ -285,6 +303,20 @@ let searchQ = "";       // in-app search (see logic.js searchableFields)
       // __tests__/preload.test.mjs pins the policy this depends on.
       const { rows } = await db("SELECT * FROM app_couples_bucket_list__bucket_items ORDER BY created_at DESC");
       items = rows;
+    }
+
+    // The first load failed: a banner that stays until a load succeeds. While
+    // it shows, an unread list is not drawn as an empty one.
+    let loadFailed = false;
+    function showLoadError(thing) {
+      loadFailed = true;
+      const banner = document.getElementById("load-error");
+      banner.querySelector("span").textContent = `Couldn’t load ${thing}.`;
+      banner.hidden = false;
+    }
+    function clearLoadError() {
+      loadFailed = false;
+      document.getElementById("load-error").hidden = true;
     }
 
     window.savePartner = async function() {
@@ -312,7 +344,7 @@ let searchQ = "";       // in-app search (see logic.js searchableFields)
         showMain();
       } catch(e) {
         if (btn) { btn.disabled = false; btn.textContent = "Get Started"; }
-        throw e;
+        hubAlert(e.message);
       }
     };
 
@@ -380,7 +412,7 @@ let searchQ = "";       // in-app search (see logic.js searchableFields)
       const category = document.getElementById("f-category")?.value ?? "other";
 
       // Optimistic: add to list, close modal, render immediately
-      const optimisticItem = { id, created_by: ME?.id ?? "demo", title, notes, category, done_at: null, done_note: null, photo_id: null, created_at: now };
+      const optimisticItem = { id, created_by: ME?.id ?? "demo", title, notes, category, done_at: null, done_note: null, photo_id: null, thumb_file_id: null, created_at: now };
       items = [optimisticItem, ...items];
       closeModal();
       renderItems();
@@ -391,9 +423,10 @@ let searchQ = "";       // in-app search (see logic.js searchableFields)
           "INSERT INTO app_couples_bucket_list__bucket_items (id, created_by, session_id, title, notes, category, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
           [id, ME.id, null, title, notes, category, now]
         );
-      } catch {
+      } catch (e) {
         items = items.filter(i => i !== optimisticItem);
         renderItems();
+        hubAlert("That could not be added.", { description: e.message });
       }
     };
 
@@ -450,41 +483,46 @@ let searchQ = "";       // in-app search (see logic.js searchableFields)
         const doneNote  = document.getElementById("f-done-note")?.value.trim() ?? "";
         const photoFile = document.getElementById("f-photo")?.files?.[0];
         const item      = items.find(i => i.id === id);
-        const origItem  = item ? { done_at: item.done_at, done_note: item.done_note, photo_id: item.photo_id } : null;
+        const origItem  = item ? { done_at: item.done_at, done_note: item.done_note, photo_id: item.photo_id, thumb_file_id: item.thumb_file_id } : null;
 
-        let photoId = null;
+        let photoId = null, thumbId = null;
         if (photoFile) {
-          const { id: fid } = await files.upload(photoFile);
-          photoId = fid;
+          const up = await files.upload(photoFile, { thumbnail: true });
+          photoId = up.id;
+          thumbId = up.thumbnailId ?? null;
         }
 
         const now = new Date().toISOString();
 
         if (!photoFile && item) {
           // Optimistic: update in memory, close modal, render immediately
-          item.done_at = now; item.done_note = doneNote || null; item.photo_id = null;
+          item.done_at = now; item.done_note = doneNote || null; item.photo_id = null; item.thumb_file_id = null;
           closeModal(); renderItems();
           if (ME) {
             try {
-              await db("UPDATE app_couples_bucket_list__bucket_items SET done_at = ?, done_note = ?, photo_id = ? WHERE id = ?",
-                [now, doneNote || null, null, id]);
-            } catch {
+              const res = await db("UPDATE app_couples_bucket_list__bucket_items SET done_at = ?, done_note = ?, photo_id = ?, thumb_file_id = ? WHERE id = ?",
+                [now, doneNote || null, null, null, id]);
+              // The row policy narrows a write it will not allow to zero rows.
+              if (res.changed === 0) throw new Error("This can no longer be changed.");
+            } catch (e) {
               if (origItem) Object.assign(item, origItem);
               renderItems();
+              hubAlert(e.message);
             }
           }
         } else {
           // Photo case: wait for upload + DB write, then update in memory
           if (ME) {
-            await db("UPDATE app_couples_bucket_list__bucket_items SET done_at = ?, done_note = ?, photo_id = ? WHERE id = ?",
-              [now, doneNote || null, photoId, id]);
-            if (item) { item.done_at = now; item.done_note = doneNote || null; item.photo_id = photoId; }
+            const res = await db("UPDATE app_couples_bucket_list__bucket_items SET done_at = ?, done_note = ?, photo_id = ?, thumb_file_id = ? WHERE id = ?",
+              [now, doneNote || null, photoId, thumbId, id]);
+            if (res.changed === 0) throw new Error("This can no longer be changed.");
+            if (item) { item.done_at = now; item.done_note = doneNote || null; item.photo_id = photoId; item.thumb_file_id = thumbId; }
           }
           closeModal(); renderItems();
         }
       } catch(e) {
         if (btn) { btn.disabled = false; btn.innerHTML = `Done! ${glyph("tick", { accent: "currentColor" })}`; }
-        throw e;
+        hubAlert(e.message);
       }
     };
 
@@ -554,7 +592,8 @@ let searchQ = "";       // in-app search (see logic.js searchableFields)
       if (!active.length) {
         activeEl.innerHTML = searchQ
           ? `<div class="empty-state"><div class="empty-icon">${chickadee("searching")}</div><p>Nothing matches "${esc(searchQ)}".</p></div>`
-          : `<div class="empty-state"><div class="empty-icon">${chickadee("nest")}</div><p>No items yet — add your first dream!</p></div>`;
+          : loadFailed && !items.length ? ""
+          : `<div class="empty-state" data-testid="empty-state"><div class="empty-icon">${chickadee("nest")}</div><p>No items yet — add your first dream!</p></div>`;
       } else {
         const groups = groupByCategory(active);
         activeEl.innerHTML = groups.map(g => `
@@ -582,7 +621,7 @@ let searchQ = "";       // in-app search (see logic.js searchableFields)
       const notesHtml  = item.notes ? `<div class="item-notes">${esc(item.notes)}</div>` : "";
       const doneNoteHtml = item.done_note ? `<div class="item-done-note">"${esc(item.done_note)}"</div>` : "";
       const photoHtml  = item.photo_id
-        ? `<img class="item-photo" src="${esc(files.url(item.photo_id))}" alt="" loading="lazy" />`
+        ? `<img class="item-photo" src="${esc(files.url(tilePhotoId(item)))}" alt="" loading="lazy" />`
         : "";
       const metaHtml   = isDone
         ? `<div class="item-meta">Completed ${formatRelativeDate(item.done_at)}</div>`
@@ -598,16 +637,33 @@ let searchQ = "";       // in-app search (see logic.js searchableFields)
     }
 
     // ── Init ──────────────────────────────────────────────────────────────────
-    (async () => {
-      await loadMembers();
-      partner = await loadPartner();
-      if (!partner || !partnerReciprocal) {
-        window.showSetup();
-      } else {
-        await loadItems();
-        showMain();
+    async function start() {
+      try {
+        await loadMembers();
+        partner = await loadPartner();
+      } catch {
+        // Neither view opens: a member whose pairing could not be read is not sent to setup.
+        showLoadError("your partner");
+        return;
       }
-    })();
+      if (!partner || !partnerReciprocal) {
+        clearLoadError();
+        window.showSetup();
+        return;
+      }
+      try {
+        await loadItems();
+      } catch {
+        // The list view still opens when its items cannot be read, with the banner above it.
+        showLoadError("your bucket list");
+        showMain();
+        return;
+      }
+      clearLoadError();
+      showMain();
+    }
+    document.querySelector('[data-testid="load-retry"]').addEventListener("click", start);
+    start();
   </script>
 </body>
 </html>

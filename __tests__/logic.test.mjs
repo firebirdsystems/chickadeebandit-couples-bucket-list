@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { CATEGORIES, validateItem, categoryLabel, groupByCategory, searchableFields } from "../src/logic.js";
+import { CATEGORIES, validateItem, categoryLabel, groupByCategory, searchableFields, tilePhotoId } from "../src/logic.js";
 
 describe("validateItem", () => {
   it("rejects empty and whitespace-only titles", () => {
@@ -63,5 +63,18 @@ describe("searchableFields", () => {
     const fields = searchableFields({ title: "Northern lights", notes: "Tromso in February", category: "travel", done_note: "" });
     expect(fields).toContain("Tromso in February");
     expect(fields).toContain("travel");
+  });
+});
+
+describe("tilePhotoId", () => {
+  it("draws the small copy when one was kept, else the photo itself", () => {
+    expect(tilePhotoId({ photo_id: "p1", thumb_file_id: "t1" })).toBe("t1");
+    expect(tilePhotoId({ photo_id: "p1", thumb_file_id: null })).toBe("p1");
+    expect(tilePhotoId({ photo_id: "p1" })).toBe("p1");
+  });
+
+  it("is empty for an item with no photo", () => {
+    expect(tilePhotoId({ photo_id: null, thumb_file_id: null })).toBe("");
+    expect(tilePhotoId(null)).toBe("");
   });
 });
