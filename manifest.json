@@ -56,8 +56,8 @@
   "file_acls": {
     "read": "couple_scoped"
   },
-  "delete_file_columns": {
-    "bucket_items": ["photo_id", "thumb_file_id"]
+  "file_columns": {
+    "bucket_items": { "columns": ["photo_id", "thumb_file_id"] }
   },
   "icon": "🪣",
   "glance": {
