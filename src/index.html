@@ -225,7 +225,7 @@
 
   <script type="module">
     import { esc, initial, memberColor, formatRelativeDate, createFilesHelper, searchMatch, glyph, chickadee, hubAlert } from "/hub-sdk.js";
-    import { CATEGORIES, validateItem, categoryLabel, groupByCategory, searchableFields, tilePhotoId } from "./logic.js";
+    import { CATEGORIES, validateItem, categoryLabel, groupByCategory, searchableFields, tilePhotoId, failureLine, photoUploadLine } from "./logic.js";
 
     // Static markup cannot call the SDK, so its marks are drawn here.
     document.getElementById("setup-icon").innerHTML = chickadee("pair", { size: 80 });
@@ -255,7 +255,8 @@ let searchQ = "";       // in-app search (see logic.js searchableFields)
         body: JSON.stringify({ sql, params }),
       });
       const json = await res.json().catch(() => null);
-      if (!res.ok || !json || typeof json !== "object" || json.error) throw new Error(json?.error || "Couldn’t reach the hub. Try again.");
+      // The status (and `code`) pick the line shown; the hub's text stays in the console.
+      if (!res.ok || !json || typeof json !== "object" || json.error) throw Object.assign(new Error(json?.error || "Couldn’t reach the hub. Try again."), { status: res.status, code: json?.code });
       return json;
     }
 
@@ -320,11 +321,11 @@ let searchQ = "";       // in-app search (see logic.js searchableFields)
     }
 
     // What a failed write shows: this app's own wording when the error carries
-    // it (`forUser`), otherwise one fixed line. The hub's error text only goes
-    // to the console.
-    function failText(e, line) {
+    // it (`forUser`), otherwise failureLine's, from the status. The hub's error
+    // text only goes to the console.
+    function failText(e, words) {
       if (!e?.forUser) console.error("[couples-bucket-list] write failed:", e);
-      return e?.forUser ? e.message : line;
+      return failureLine(e, words);
     }
 
     window.savePartner = async function() {
@@ -338,7 +339,7 @@ let searchQ = "";       // in-app search (see logic.js searchableFields)
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ partner_id: partnerId }),
         }) : null;
-        if (res && !res.ok) throw new Error((await res.json()).error ?? "Could not save partner");
+        if (res && !res.ok) throw Object.assign(new Error((await res.json().catch(() => ({}))).error ?? "Could not save partner"), { status: res.status });
         const status = res ? await res.json() : { reciprocal: true };
         partnerReciprocal = status.reciprocal;
         partner = members.find(m => m.id === partnerId) ?? null;
@@ -348,12 +349,20 @@ let searchQ = "";       // in-app search (see logic.js searchableFields)
           showWaitingForPartner();
           return;
         }
-        await loadItems();
-        showMain();
       } catch(e) {
         if (btn) { btn.disabled = false; btn.textContent = "Get Started"; }
-        hubAlert(failText(e, "Couldn’t save your partner — try again."));
+        hubAlert(failText(e, { action: "save your partner", thing: "partner" }));
+        return;
       }
+      // The pairing is stored: a failed read of the list is a load failure, not a failed save.
+      try {
+        await loadItems();
+        clearLoadError();
+      } catch (e) {
+        console.error(e);
+        showLoadError("your bucket list");
+      }
+      showMain();
     };
 
     // ── Modal helpers ─────────────────────────────────────────────────────────
@@ -434,7 +443,7 @@ let searchQ = "";       // in-app search (see logic.js searchableFields)
       } catch (e) {
         items = items.filter(i => i !== optimisticItem);
         renderItems();
-        hubAlert(failText(e, "Couldn’t add that — try again."));
+        hubAlert(failText(e, { action: "add that", thing: "item" }));
       }
     };
 
@@ -496,8 +505,8 @@ let searchQ = "";       // in-app search (see logic.js searchableFields)
         let photoId = null, thumbId = null;
         if (photoFile) {
           // An upload the hub refuses (too large, wrong type, too many, storage
-          // full) says why in its own words, and those are shown.
-          const up = await files.upload(photoFile, { thumbnail: true }).catch((e) => { throw Object.assign(e, { uploadRefused: [413, 415, 429, 507].includes(e?.status) }); });
+          // full) says why, in this app's words (photoUploadLine).
+          const up = await files.upload(photoFile, { thumbnail: true }).catch((e) => { throw Object.assign(e, { uploadRefused: [403, 413, 415, 429, 507].includes(e?.status) }); });
           photoId = up.id;
           thumbId = up.thumbnailId ?? null;
         }
@@ -517,7 +526,7 @@ let searchQ = "";       // in-app search (see logic.js searchableFields)
             } catch (e) {
               if (origItem) Object.assign(item, origItem);
               renderItems();
-              hubAlert(failText(e, "Couldn’t mark that done — try again."));
+              hubAlert(failText(e, { action: "mark that done", thing: "item" }));
             }
           }
         } else {
@@ -532,8 +541,8 @@ let searchQ = "";       // in-app search (see logic.js searchableFields)
         }
       } catch(e) {
         if (btn) { btn.disabled = false; btn.innerHTML = `Done! ${glyph("tick", { accent: "currentColor" })}`; }
-        if (e?.uploadRefused) { console.error("[couples-bucket-list] upload refused:", e); hubAlert("Couldn’t add the photo", { description: e.message }); }
-        else hubAlert(failText(e, "Couldn’t mark that done — try again."));
+        if (e?.uploadRefused) { console.error("[couples-bucket-list] upload refused:", e); hubAlert(photoUploadLine(e)); }
+        else hubAlert(failText(e, { action: "mark that done", thing: "item" }));
       }
     };
 
